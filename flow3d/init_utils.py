@@ -309,6 +309,7 @@ def run_initial_optim(
     motion_coefs: torch.Tensor,
     Ks: torch.Tensor,
     w2cs: torch.Tensor,
+    ckpt_path: str,
     num_iters: int = 1000,
     use_depth_range_loss: bool = False,
 ):
@@ -366,6 +367,18 @@ def run_initial_optim(
         return torch.cat(
             [rotmats, transls[..., None]], dim=-1
         )
+        
+    # check if checkpoint exists, if so skip optimization
+    import os
+    if os.path.exists(ckpt_path):
+        guru.info(f"Loading initialization checkpoint from {ckpt_path}")
+        ckpt = torch.load(ckpt_path, map_location=device)
+        init_rots.data = ckpt["init_rots"]
+        init_ts.data = ckpt["init_ts"]
+        motion_coefs.data = ckpt["motion_coefs"]
+        fg.params["means"].data = ckpt["means"]
+        guru.info("Initialization checkpoint loaded, skipping optimization")
+        return
 
     pbar = tqdm(range(0, num_iters))
     for i in pbar:
@@ -451,6 +464,20 @@ def run_initial_optim(
             f"{small_acc_loss_tracks.item():.3f} "
             f"{z_accel_loss.item():.3f} "
         )
+        
+    # save checkpoint
+    import os
+    os.makedirs(os.path.dirname(ckpt_path), exist_ok=True)
+    torch.save(
+        {
+            "init_rots": init_rots.data,
+            "init_ts": init_ts.data,
+            "motion_coefs": motion_coefs.data,
+            "means": fg.params["means"].data,
+        },
+        ckpt_path,
+    )
+    guru.info(f"Initialization checkpoint saved to {ckpt_path}")
 
 
 def random_quats(N: int) -> torch.Tensor:

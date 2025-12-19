@@ -211,7 +211,9 @@ def initialize_and_checkpoint_model(
     w2cs = train_dataset.get_w2cs().to(device)
 
     guru.info("Start run_initial_optim")
-    run_initial_optim(fg_params, init_rots, init_ts, tracks_3d, motion_coefs, Ks, w2cs, num_iters=1000)
+    # ckpt_path = f"{cfg.work_dir}/checkpoints/last.ckpt"
+    init_ckpt_path = os.path.join(cfg.work_dir, "checkpoints", "init.ckpt")
+    run_initial_optim(fg_params, init_rots, init_ts, tracks_3d, motion_coefs, Ks, w2cs, num_iters=1000, ckpt_path=init_ckpt_path)
     guru.info("End run_initial_optim")
 
 
