@@ -7,18 +7,47 @@
 ## Installation
 Please follow the instructions below to set up the environment:
 
+### Quick Setup (Recommended)
+```bash
+bash setup.sh
+```
+
+### Manual Setup
 ```bash
 # Create a new conda environment
-conda create -n himor python=3.10
+conda create -n himor python=3.10 -y
 conda activate himor
 
-# Install dependencies
-conda install -c "nvidia/label/cuda-11.8.0" cuda-toolkit
-pip install -r requirements.txt
-pip install git+https://github.com/nerfstudio-project/gsplat.git
-pip install "git+https://github.com/facebookresearch/pytorch3d.git"
+# Install CUDA toolkit
+conda install -c "nvidia/label/cuda-12.1.0" cuda-toolkit -y
+
+# Install PyTorch with CUDA 12.1 support
+pip install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu121
+
+# Install additional packages
+pip install git+https://github.com/nerfstudio-project/gsplat.git --no-build-isolation
+pip install "git+https://github.com/facebookresearch/pytorch3d.git" --no-build-isolation
 pip install git+https://github.com/rahul-goel/fused-ssim/ --no-build-isolation
+
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Install cuML via conda (IMPORTANT: must be done after pip requirements)
+# cuML must be installed via conda to properly manage RAPIDS ecosystem dependencies
+conda install -c rapidsai -c conda-forge -c nvidia cuml=24.12 python=3.10 cuda-version=12.1 -y
+
+# Reinstall scikit-learn (may have been removed by cuML installation)
+conda install scikit-learn -y
+
+# Install numpy and cupy
+pip install "numpy<2"
+pip install cupy-cuda12x
 ```
+
+### Important Notes
+- **cuML must be installed via conda**, not pip, to avoid CUDA compatibility issues
+- The transformers library is pinned to version 4.47.1 for compatibility with PyTorch 2.2.0
+- CUDA 12.1 is required for proper GPU acceleration
 
 ## Data preparation
 ### iPhone Dataset

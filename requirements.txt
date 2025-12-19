@@ -12,7 +12,8 @@ pytorch-msssim
 fsspec
 loguru
 wandb
-transformers
+transformers==4.47.1
+tokenizers==0.21.4
 einops
 lpips
 ipdb
@@ -22,5 +23,4 @@ pyyaml
 black==24.4.2
 isort==5.13.2
 tyro
-cuml-cu12
 torchmetrics
